@@ -38,9 +38,9 @@ class DownloadViewModel: ObservableObject {
     @Published var embedSubtitles: Bool = true  // Default: embed when subtitles enabled
     @Published var keepSubtitleFiles: Bool = false  // Default: delete after embedding
     
-    // Browser cookies for bot detection
-    @Published var useBrowserCookies: Bool = false
-    @Published var browserForCookies: String = "chrome"
+    // Browser cookies for bot detection (persisted)
+    @AppStorage("useBrowserCookies") var useBrowserCookies: Bool = false
+    @AppStorage("browserForCookies") var browserForCookies: String = "chrome"
     
     // MARK: - Private Properties
     
