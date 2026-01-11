@@ -262,21 +262,39 @@ struct ContentView: View {
                     .font(.headline)
                     .frame(width: 120, alignment: .leading)
                 
-                Toggle("Use browser cookies", isOn: $viewModel.useBrowserCookies)
-                    .disabled(viewModel.downloadState.isRunning)
-                    .help("Use cookies from your browser to bypass bot detection")
-                
-                if viewModel.useBrowserCookies {
-                    Picker("Browser", selection: $viewModel.browserForCookies) {
-                        Text("Chrome").tag("chrome")
-                        Text("Firefox").tag("firefox")
-                        Text("Safari").tag("safari")
-                        Text("Edge").tag("edge")
-                        Text("Brave").tag("brave")
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 12) {
+                        Toggle("Use browser cookies", isOn: $viewModel.useBrowserCookies)
+                            .disabled(viewModel.downloadState.isRunning)
+                        
+                        if viewModel.useBrowserCookies {
+                            Text("Browser")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Picker("", selection: $viewModel.browserForCookies) {
+                                Text("Chrome").tag("chrome")
+                                Text("Firefox").tag("firefox")
+                                Text("Safari").tag("safari")
+                                Text("Edge").tag("edge")
+                                Text("Brave").tag("brave")
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 100)
+                            .disabled(viewModel.downloadState.isRunning)
+                        }
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 120)
-                    .disabled(viewModel.downloadState.isRunning)
+                    
+                    // Info text
+                    HStack(spacing: 4) {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.blue.opacity(0.8))
+                            .font(.system(size: 10))
+                        
+                        Text("For protected sites (Netflix, Prime, Hotstar) & bot detection bypass")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
