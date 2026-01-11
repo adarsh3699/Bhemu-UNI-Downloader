@@ -66,6 +66,30 @@ struct BhemuUNIDownloaderApp: App {
         .commands {
             // Remove default "New Window" command
             CommandGroup(replacing: .newItem) {}
+            
+            // Add Help command
+            CommandGroup(replacing: .help) {
+                HelpMenuButton()
+            }
         }
+        
+        // Help Window
+        Window("Help", id: "help") {
+            HelpView()
+        }
+        .defaultPosition(.center)
+        .windowResizability(.contentSize)
+    }
+}
+
+// Helper view for Help menu button
+struct HelpMenuButton: View {
+    @Environment(\.openWindow) private var openWindow
+    
+    var body: some View {
+        Button("Bhemu UNI Downloader Help") {
+            openWindow(id: "help")
+        }
+        .keyboardShortcut("?", modifiers: .command)
     }
 }

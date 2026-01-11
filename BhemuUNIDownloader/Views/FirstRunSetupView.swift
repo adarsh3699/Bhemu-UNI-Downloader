@@ -209,7 +209,7 @@ struct FirstRunSetupView: View {
                                         }
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .onChange(of: installationLog.count) { _ in
+                                    .onChange(of: installationLog.count) { oldValue, newValue in
                                         if let lastIndex = installationLog.indices.last {
                                             withAnimation {
                                                 proxy.scrollTo(lastIndex, anchor: .bottom)

@@ -59,6 +59,9 @@ struct ContentView: View {
                 .padding()
                 .background(Color(.windowBackgroundColor))
         }
+        .onDrop(of: [.url, .text], isTargeted: nil) { providers in
+            handleDrop(providers: providers)
+        }
         .fileImporter(
             isPresented: $showingDirectoryPicker,
             allowedContentTypes: [.folder],
@@ -130,7 +133,7 @@ struct ContentView: View {
                 }
             }
             
-            Text("Tip: Drag and drop a URL here")
+            Text("Tip: Drag and drop a URL anywhere in the app")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
@@ -143,9 +146,14 @@ struct ContentView: View {
         // Try to extract URL from dropped item
         for provider in providers {
             // Try URL type first
-            if provider.hasItemConformingToTypeIdentifier("public.url") {
-                _ = provider.loadDataRepresentation(forTypeIdentifier: "public.url") { data, error in
-                    if let data = data, let urlString = String(data: data, encoding: .utf8) {
+            if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+                provider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { item, error in
+                    if let data = item as? Data,
+                       let url = URL(dataRepresentation: data, relativeTo: nil) {
+                        DispatchQueue.main.async {
+                            viewModel.videoURL = url.absoluteString
+                        }
+                    } else if let urlString = item as? String {
                         DispatchQueue.main.async {
                             viewModel.videoURL = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
@@ -155,11 +163,23 @@ struct ContentView: View {
             }
             
             // Try plain text
-            if provider.hasItemConformingToTypeIdentifier("public.plain-text") {
-                _ = provider.loadDataRepresentation(forTypeIdentifier: "public.plain-text") { data, error in
-                    if let data = data, let text = String(data: data, encoding: .utf8) {
+            if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
+                provider.loadItem(forTypeIdentifier: UTType.plainText.identifier, options: nil) { item, error in
+                    if let urlString = item as? String {
                         DispatchQueue.main.async {
-                            viewModel.videoURL = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                            viewModel.videoURL = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                    }
+                }
+                return true
+            }
+            
+            // Try UTF-8 plain text (fallback)
+            if provider.hasItemConformingToTypeIdentifier("public.utf8-plain-text") {
+                provider.loadItem(forTypeIdentifier: "public.utf8-plain-text", options: nil) { item, error in
+                    if let urlString = item as? String {
+                        DispatchQueue.main.async {
+                            viewModel.videoURL = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
                     }
                 }

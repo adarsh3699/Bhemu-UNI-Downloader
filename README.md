@@ -2,6 +2,7 @@
 
 <div align="center">
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![macOS](https://img.shields.io/badge/macOS-13.0+-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.0+-orange)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-3.0+-green)
