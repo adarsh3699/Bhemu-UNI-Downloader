@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Allow app to execute external processes (yt-dlp, ffmpeg) -->
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>*</string>
+    </array>
+    
+    <!-- Disable App Sandbox for personal use (allows subprocess execution) -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+    
+    <!-- Allow network access (for yt-dlp to download content) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <!-- Allow file access for reading/writing downloads -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    
+    <!-- Hardened runtime for security -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <false/>
+    
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <false/>
+    
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <false/>
+</dict>
+</plist>

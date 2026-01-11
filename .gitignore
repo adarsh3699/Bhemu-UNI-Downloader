@@ -1,0 +1,31 @@
+# Xcode
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+build/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+UserInterfaceState.xcuserstate
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Trashes
+
+# Build artifacts
+Release/
+*.dmg
+
+# Binaries (large files)
+Binaries/yt-dlp
+Binaries/ffmpeg
+Binaries/*.zip
