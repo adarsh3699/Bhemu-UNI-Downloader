@@ -14,6 +14,7 @@ enum DownloadState: Equatable {
     case completed
     case failed(String)
     case cancelled
+    case retrying(attempt: Int)
     
     var isRunning: Bool {
         if case .running = self {
@@ -31,6 +32,13 @@ enum DownloadState: Equatable {
     
     var canResume: Bool {
         if case .paused = self {
+            return true
+        }
+        return false
+    }
+    
+    var isRetrying: Bool {
+        if case .retrying = self {
             return true
         }
         return false

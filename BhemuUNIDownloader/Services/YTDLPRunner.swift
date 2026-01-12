@@ -187,9 +187,11 @@ class YTDLPRunner {
         
         // Subtitle options
         if settings.downloadSubtitles {
-            arguments.append("--write-subs")
+            arguments.append("--write-subs")        // Download manual subtitles
+            arguments.append("--write-auto-subs")   // Download auto-generated subtitles
             arguments.append("--sub-langs")
             arguments.append(settings.subtitleLanguages)
+            arguments.append("--ignore-errors")     // Continue if subtitle download fails (e.g., 429)
             
             if settings.embedSubtitles && quality != .audioOnly {
                 arguments.append("--embed-subs")

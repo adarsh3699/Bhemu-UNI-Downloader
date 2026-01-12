@@ -37,6 +37,10 @@ class DownloadViewModel: ObservableObject {
     @Published var subtitleLanguages: String = "en"
     @Published var embedSubtitles: Bool = true  // Default: embed when subtitles enabled
     @Published var keepSubtitleFiles: Bool = false  // Default: delete after embedding
+    @Published var availableSubtitles: [SubtitleLanguage] = []
+    @Published var selectedSubtitleCodes: Set<String> = ["en"]
+    @Published var isFetchingSubtitles: Bool = false
+    @Published var hasAttemptedSubtitleFetch: Bool = false
     
     // Browser cookies for bot detection (persisted)
     @AppStorage("useBrowserCookies") var useBrowserCookies: Bool = false
@@ -65,6 +69,11 @@ class DownloadViewModel: ObservableObject {
             .debounce(for: .milliseconds(800), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.checkIfPlaylist()
+                // Clear previous subtitle data when URL changes
+                self?.availableSubtitles = []
+                self?.selectedSubtitleCodes = ["en"]
+                self?.subtitleLanguages = "en"
+                self?.hasAttemptedSubtitleFetch = false
             }
             .store(in: &cancellables)
     }
@@ -83,6 +92,13 @@ class DownloadViewModel: ObservableObject {
     
     var dependencyErrorMessage: String {
         return ytdlpRunner.getMissingDependenciesMessage() ?? ""
+    }
+    
+    /// Indicates if we're showing common languages (platform doesn't support listing)
+    var isShowingCommonLanguages: Bool {
+        return hasAttemptedSubtitleFetch && 
+               !isFetchingSubtitles &&
+               availableSubtitles.first?.isCommon == true
     }
     
     // MARK: - Actions
@@ -134,6 +150,54 @@ class DownloadViewModel: ObservableObject {
         }
         
         await urlDebounceTask?.value
+    }
+    
+    /// Fetches available subtitle languages for the current URL
+    func fetchSubtitles() {
+        guard !videoURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+        
+        let url = videoURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        Task {
+            isFetchingSubtitles = true
+            hasAttemptedSubtitleFetch = true
+            
+            let subtitles = await FormatFetcher.fetchAvailableSubtitles(for: url)
+            
+            guard !Task.isCancelled else {
+                isFetchingSubtitles = false
+                return
+            }
+            
+            if subtitles.isEmpty {
+                // Platform doesn't support subtitle listing (Hotstar, etc.)
+                // Use common predefined languages
+                appendLog("ℹ️ Subtitle listing not available for this platform.")
+                appendLog("💡 Showing common languages. Select the ones you need.")
+                availableSubtitles = SubtitleLanguage.commonLanguages
+            } else {
+                availableSubtitles = subtitles
+            }
+            
+            isFetchingSubtitles = false
+        }
+    }
+    
+    /// Toggles a subtitle language selection
+    func toggleSubtitleLanguage(_ code: String) {
+        if selectedSubtitleCodes.contains(code) {
+            selectedSubtitleCodes.remove(code)
+        } else {
+            selectedSubtitleCodes.insert(code)
+        }
+        updateSubtitleLanguagesString()
+    }
+    
+    /// Updates subtitle languages string from selected codes
+    func updateSubtitleLanguagesString() {
+        subtitleLanguages = selectedSubtitleCodes.sorted().joined(separator: ",")
     }
     
     /// Validates dependencies and starts the download
@@ -200,10 +264,20 @@ class DownloadViewModel: ObservableObject {
             attemptCount += 1
             
             if attemptCount > 1 {
+                // Exponential backoff: 10s, 20s, 40s, 80s, 160s
+                let delaySeconds = 10 * (1 << (attemptCount - 2)) // 2^(n-1) * 10
                 await MainActor.run {
-                    appendLog("⚠️ Retry attempt \(attemptCount - 1)/\(maxAttempts - 1)")
+                    // Show retrying state during wait period
+                    downloadState = .retrying(attempt: attemptCount - 1)
+                    appendLog("⚠️ Retry attempt \(attemptCount - 1)/\(maxAttempts - 1) - waiting \(delaySeconds)s...")
                 }
-                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds delay
+                try? await Task.sleep(nanoseconds: UInt64(delaySeconds) * 1_000_000_000)
+                
+                // Reset to running state after wait
+                await MainActor.run {
+                    downloadState = .running
+                    appendLog("📥 Retrying download...")
+                }
             }
             
             let success = await performDownload(with: downloadSettings)
@@ -628,12 +702,6 @@ class DownloadViewModel: ObservableObject {
         while attemptCount < maxAttempts {
             attemptCount += 1
             
-            if attemptCount > 1 {
-                await MainActor.run {
-                    updatePlaylistItemStatus(id: trackingId, status: .retrying(attempt: attemptCount - 1))
-                }
-            }
-            
             let success = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
                 // Create a new YTDLPRunner instance for concurrent downloads
                 let runner = YTDLPRunner()
@@ -713,11 +781,20 @@ class DownloadViewModel: ObservableObject {
             }
             
             if attemptCount < maxAttempts {
+                // Exponential backoff: 10s, 20s, 40s, 80s, 160s
+                let delaySeconds = 10 * (1 << (attemptCount - 1)) // 2^(n-1) * 10
                 await MainActor.run {
-                    appendLog("⚠️ [\(index)/\(total)] Retry \(attemptCount)/\(maxAttempts) for: \(item.title)")
+                    // Show retrying status during wait period
+                    updatePlaylistItemStatus(id: trackingId, status: .retrying(attempt: attemptCount))
+                    appendLog("⚠️ [\(index)/\(total)] Retry \(attemptCount)/\(maxAttempts) for: \(item.title) - waiting \(delaySeconds)s...")
                 }
-                // Wait a bit before retrying
-                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+                try? await Task.sleep(nanoseconds: UInt64(delaySeconds) * 1_000_000_000)
+                
+                // Reset status to downloading after retry delay
+                await MainActor.run {
+                    updatePlaylistItemStatus(id: trackingId, status: .downloading)
+                    appendLog("📥 [\(index)/\(total)] Retrying: \(item.title)")
+                }
             }
         }
         

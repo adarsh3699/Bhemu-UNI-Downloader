@@ -117,6 +117,24 @@ Installation:
 Note: The app will automatically install Homebrew, yt-dlp, and ffmpeg
 for you. No terminal commands or technical knowledge required!
 
+🛠️ Troubleshooting
+-   Cannot be opened because Apple cannot verify it is free from malware
+
+This is a normal macOS security warning for unsigned apps. To fix:
+1. Go to System Settings → Privacy & Security
+2. Scroll down to the Security section
+3. You'll see a message: "Bhemu UNI Downloader was blocked from use because it is not from an identified developer"
+4. Click Open Anyway
+5. In the confirmation dialog, click Open
+
+The app will now launch normally. This only needs to be done once.
+
+Alternative method:
+-   xattr -cr /Applications/Bhemu\ UNI\ Downloader.app
+
+Run this in Terminal if the app is in your Applications folder to remove the quarantine attribute.
+
+
 Features:
 ✅ One-click setup (installs everything automatically)
 ✅ Download from YouTube and 1000+ sites

@@ -229,29 +229,103 @@ struct ContentView: View {
             
             // Subtitle Options (shown when enabled)
             if viewModel.downloadSubtitles {
-                HStack {
-                    Text("Languages")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .frame(width: 120, alignment: .leading)
-                    
-                    TextField("en,es,fr", text: $viewModel.subtitleLanguages)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 150)
-                        .disabled(viewModel.downloadState.isRunning)
-                    
-                    if viewModel.selectedQuality != .audioOnly {
-                        Toggle("Embed in video", isOn: $viewModel.embedSubtitles)
-                            .disabled(viewModel.downloadState.isRunning)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Languages")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .frame(width: 120, alignment: .leading)
                         
-                        if viewModel.embedSubtitles {
-                            Toggle("Keep files", isOn: $viewModel.keepSubtitleFiles)
-                                .disabled(viewModel.downloadState.isRunning)
-                                .help("Keep separate subtitle files after embedding")
+                        // Show fetch button initially (before first attempt)
+                        if !viewModel.hasAttemptedSubtitleFetch && !viewModel.isFetchingSubtitles {
+                            Button(action: viewModel.fetchSubtitles) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "arrow.down.circle")
+                                    Text("Load Available Languages")
+                                }
+                            }
+                            .disabled(viewModel.downloadState.isRunning || viewModel.videoURL.isEmpty)
                         }
+                        // Show loading spinner while fetching
+                        else if viewModel.isFetchingSubtitles {
+                            HStack(spacing: 4) {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                                Text("Loading...")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        // Show language selection menu if subtitles loaded
+                        else if !viewModel.availableSubtitles.isEmpty {
+                            Menu {
+                                ForEach(viewModel.availableSubtitles) { subtitle in
+                                    Button(action: {
+                                        viewModel.toggleSubtitleLanguage(subtitle.code)
+                                    }) {
+                                        HStack {
+                                            Text("\(subtitle.displayName) (\(subtitle.code))")
+                                            Spacer()
+                                            if viewModel.selectedSubtitleCodes.contains(subtitle.code) {
+                                                Image(systemName: "checkmark")
+                                                    .foregroundColor(.blue)
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Divider()
+                                
+                                Button("Clear Selection") {
+                                    viewModel.selectedSubtitleCodes.removeAll()
+                                    viewModel.updateSubtitleLanguagesString()
+                                }
+                                
+                                Button("Try Again") {
+                                    viewModel.fetchSubtitles()
+                                }
+                            } label: {
+                                HStack {
+                                    Text(viewModel.selectedSubtitleCodes.isEmpty ? "Select languages" : viewModel.selectedSubtitleCodes.sorted().joined(separator: ", "))
+                                        .lineLimit(1)
+                                        .frame(width: 200, alignment: .leading)
+                                    Image(systemName: "chevron.down")
+                                        .font(.caption)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.controlBackgroundColor))
+                                .cornerRadius(6)
+                            }
+                            .disabled(viewModel.downloadState.isRunning)
+                        }
+                        
+                        if viewModel.selectedQuality != .audioOnly {
+                            Toggle("Embed in video", isOn: $viewModel.embedSubtitles)
+                                .disabled(viewModel.downloadState.isRunning)
+                            
+                            if viewModel.embedSubtitles {
+                                Toggle("Keep files", isOn: $viewModel.keepSubtitleFiles)
+                                    .disabled(viewModel.downloadState.isRunning)
+                                    .help("Keep separate subtitle files after embedding")
+                            }
+                        }
+                        
+                        Spacer()
                     }
                     
-                    Spacer()
+                    // Show hint when displaying common languages (platform doesn't support listing)
+                    if viewModel.isShowingCommonLanguages {
+                        HStack {
+                            Spacer()
+                                .frame(width: 120)
+                            
+                            Text("💡 Platform doesn't support auto-detection. Showing common languages. ⚠️ Only available subtitles will download.")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            
+                            Spacer()
+                        }
+                    }
                 }
                 .padding(.leading, 20)
             }
@@ -264,24 +338,24 @@ struct ContentView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 12) {
-                        Toggle("Use browser cookies", isOn: $viewModel.useBrowserCookies)
-                            .disabled(viewModel.downloadState.isRunning)
-                        
-                        if viewModel.useBrowserCookies {
+                Toggle("Use browser cookies", isOn: $viewModel.useBrowserCookies)
+                    .disabled(viewModel.downloadState.isRunning)
+                
+                if viewModel.useBrowserCookies {
                             Text("Browser")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
                             Picker("", selection: $viewModel.browserForCookies) {
-                                Text("Chrome").tag("chrome")
-                                Text("Firefox").tag("firefox")
-                                Text("Safari").tag("safari")
-                                Text("Edge").tag("edge")
-                                Text("Brave").tag("brave")
-                            }
-                            .pickerStyle(.menu)
+                        Text("Chrome").tag("chrome")
+                        Text("Firefox").tag("firefox")
+                        Text("Safari").tag("safari")
+                        Text("Edge").tag("edge")
+                        Text("Brave").tag("brave")
+                    }
+                    .pickerStyle(.menu)
                             .frame(width: 100)
-                            .disabled(viewModel.downloadState.isRunning)
+                    .disabled(viewModel.downloadState.isRunning)
                         }
                     }
                     
@@ -494,6 +568,18 @@ struct ContentView: View {
                 .background(Color.blue.opacity(0.1))
                 .cornerRadius(8)
                 
+            case .retrying(let attempt):
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text("Retrying (\(attempt))...")
+                        .foregroundColor(.orange)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
+                
             case .paused:
                 HStack {
                     Image(systemName: "pause.circle.fill")
@@ -530,6 +616,7 @@ struct ContentView: View {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
+                        .textSelection(.enabled)  // Make error text selectable
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
