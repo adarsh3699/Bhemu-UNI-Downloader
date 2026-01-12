@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![macOS](https://img.shields.io/badge/macOS-13.0+-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.0+-orange)
@@ -99,6 +99,32 @@ YouTube • Instagram • TikTok • Twitter/X • Facebook • Reddit • Vimeo
 ---
 
 ## 🛠️ Troubleshooting
+
+**"Cannot be opened because Apple cannot verify it is free from malware"**
+
+This is a normal macOS security warning for unsigned apps. To fix:
+
+1. Go to **System Settings** → **Privacy & Security**
+2. Scroll down to the **Security** section
+3. You'll see a message: _"Bhemu UNI Downloader was blocked from use because it is not from an identified developer"_
+4. Click **Open Anyway**
+5. In the confirmation dialog, click **Open**
+
+The app will now launch normally. This only needs to be done once.
+
+**Alternative methods:**
+
+**Method 2 - Right-click:**
+
+-   Right-click the app → **Open** → Click **Open** in the warning dialog
+
+**Method 3 - Terminal command:**
+
+```bash
+xattr -cr /Applications/Bhemu\ UNI\ Downloader.app
+```
+
+This removes the quarantine attribute. Run this in Terminal if the app is in your Applications folder.
 
 **Download fails?**
 

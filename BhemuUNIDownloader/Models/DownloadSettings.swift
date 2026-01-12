@@ -9,13 +9,13 @@ import Foundation
 
 struct DownloadSettings: Sendable {
     /// Maximum number of concurrent downloads for playlists
-    var maxConcurrentDownloads: Int = 3
+    var maxConcurrentDownloads: Int = 2
     
     /// Whether to retry failed downloads automatically
     var autoRetryOnFailure: Bool = true
     
     /// Maximum number of retry attempts
-    var maxRetryAttempts: Int = 3
+    var maxRetryAttempts: Int = 5
     
     /// Whether to download subtitles
     var downloadSubtitles: Bool = false

@@ -120,6 +120,9 @@ struct PlaylistSelectionView: View {
             TextField("e.g., 1-10", text: $viewModel.rangeInput)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 100)
+                .onSubmit {
+                    viewModel.applyRange()
+                }
             
             Button("Apply") {
                 viewModel.applyRange()

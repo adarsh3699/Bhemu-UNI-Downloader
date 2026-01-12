@@ -36,8 +36,8 @@ struct BhemuUNIDownloaderApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ContentView()
-                    .frame(minWidth: 700, minHeight: 600)
+            ContentView()
+                .frame(minWidth: 700, minHeight: 600)
                 
                 // Show first-run setup as overlay
                 if showFirstRunSetup {
