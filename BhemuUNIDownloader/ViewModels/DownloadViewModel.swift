@@ -273,6 +273,15 @@ class DownloadViewModel: ObservableObject {
                 }
                 try? await Task.sleep(nanoseconds: UInt64(delaySeconds) * 1_000_000_000)
                 
+                // Check if state changed during sleep (cancelled or paused)
+                let shouldStop = await MainActor.run {
+                    if case .cancelled = downloadState { return true }
+                    if case .paused = downloadState { return true }
+                    return false
+                }
+                
+                if shouldStop { return }
+                
                 // Reset to running state after wait
                 await MainActor.run {
                     downloadState = .running
