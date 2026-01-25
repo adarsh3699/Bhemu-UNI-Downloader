@@ -365,7 +365,7 @@ struct ContentView: View {
                             .foregroundColor(.blue.opacity(0.8))
                             .font(.system(size: 10))
                         
-                        Text("For protected sites (Netflix, Prime, Hotstar) & bot detection bypass")
+                        Text("For protected sites (Hotstar, HBO, Zee5 and more) & bot detection bypass")
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                     }
@@ -706,8 +706,8 @@ struct ContentView: View {
                 .keyboardShortcut("p", modifiers: .command)
             }
             
-            // Cancel button (for running or paused state)
-            if viewModel.downloadState.isRunning || viewModel.downloadState.isPaused {
+            // Cancel button (for running, paused, or retrying state)
+            if viewModel.downloadState.isRunning || viewModel.downloadState.isPaused || viewModel.downloadState.isRetrying {
                 Button(action: viewModel.cancelDownload) {
                     Label("Cancel", systemImage: "stop.fill")
                 }
