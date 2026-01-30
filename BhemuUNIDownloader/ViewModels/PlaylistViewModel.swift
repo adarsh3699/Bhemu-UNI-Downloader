@@ -117,7 +117,8 @@ class PlaylistViewModel: ObservableObject {
                     title: json.title ?? "Unknown",
                     duration: json.duration,
                     url: json.url ?? "",
-                    thumbnail: json.thumbnail
+                    thumbnail: json.thumbnail,
+                    originalIndex: items.count + 1
                 )
                 items.append(item)
             } else {

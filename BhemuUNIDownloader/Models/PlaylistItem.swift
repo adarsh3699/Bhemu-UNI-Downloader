@@ -14,6 +14,7 @@ struct PlaylistItem: Identifiable, Codable {
     let url: String
     let thumbnail: String?
     var isSelected: Bool = false
+    var originalIndex: Int? = nil // Position in playlist (1-based)
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -21,6 +22,7 @@ struct PlaylistItem: Identifiable, Codable {
         case duration
         case url
         case thumbnail
+        case originalIndex
     }
     
     var durationFormatted: String {

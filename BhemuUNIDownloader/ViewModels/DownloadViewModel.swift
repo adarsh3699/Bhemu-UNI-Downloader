@@ -728,6 +728,7 @@ class DownloadViewModel: ObservableObject {
                     quality: quality,
                     outputDirectory: outputDir,
                     settings: downloadSettings,
+                    playlistIndex: item.originalIndex,
                     onOutput: { [weak self] output in
                         Task { @MainActor in
                             // Parse progress for this specific download

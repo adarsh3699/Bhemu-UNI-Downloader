@@ -412,7 +412,7 @@ struct HelpView: View {
                     Text("Bhemu UNI Downloader")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                    Text("Version 1.1.0")
+                    Text("Version 1.2.0")
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }
