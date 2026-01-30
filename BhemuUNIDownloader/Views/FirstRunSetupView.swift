@@ -9,6 +9,11 @@
 
 import SwiftUI
 
+enum SetupMode: Sendable {
+    case install
+    case update
+}
+
 struct FirstRunSetupView: View {
     @State private var isCheckingDependencies = true
     @State private var hasSystemYtdlp = false
@@ -25,7 +30,14 @@ struct FirstRunSetupView: View {
     @State private var showLog = false
     @Environment(\.dismiss) private var dismiss
     
+    @State private var mode: SetupMode = .install
+    
     var onComplete: () -> Void
+
+    init(mode: SetupMode = .install, onComplete: @escaping () -> Void) {
+        self._mode = State(initialValue: mode)
+        self.onComplete = onComplete
+    }
     
     struct InstallStep: Identifiable {
         let id = UUID()
@@ -53,14 +65,25 @@ struct FirstRunSetupView: View {
                     .shadow(radius: 5)
             }
             
-            Text("👋 Welcome to Bhemu UNI Downloader")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            Text("Download videos from YouTube, Instagram, TikTok, and 1000+ sites")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            if mode == .update {
+                Text("Update Available")
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                Text("A new version of yt-dlp is available with important fixes.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("👋 Welcome to Bhemu UNI Downloader")
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                Text("Download videos from YouTube, Instagram, TikTok, and 1000+ sites")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
             
             Divider()
                 .padding(.vertical)
@@ -84,7 +107,11 @@ struct FirstRunSetupView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    if hasSystemYtdlp {
+                    if mode == .update {
+                         Text("Update completed successfully")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                    } else if hasSystemYtdlp {
                         VStack(spacing: 8) {
                             Text("⚡ Your downloads will start instantly!")
                                 .font(.headline)
@@ -108,9 +135,8 @@ struct FirstRunSetupView: View {
                     
                     Button(action: {
                         onComplete()
-                        dismiss()
                     }) {
-                        Text("Start Downloading")
+                        Text(mode == .update ? "Continue" : "Start Downloading")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                     }
@@ -258,26 +284,49 @@ struct FirstRunSetupView: View {
                 // Setup required
                 VStack(spacing: 20) {
                     VStack(spacing: 12) {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(.blue)
-                        
-                        Text("Quick Setup Required")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        
-                        Text("We'll install the tools needed for downloading")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                        if mode == .update {
+                            Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
+                                .font(.system(size: 50))
+                                .foregroundColor(.blue)
+                            
+                            Text("Update Required")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                
+                            Text("We need to update tools to fix download issues")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        } else {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: 50))
+                                .foregroundColor(.blue)
+                            
+                            Text("Quick Setup Required")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                            
+                            Text("We'll install the tools needed for downloading")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {
-                        SetupStepView(
-                            icon: "checkmark.circle.fill",
-                            title: "One-time setup",
-                            description: "Takes 3-5 minutes"
-                        )
+                        if mode == .update {
+                            SetupStepView(
+                                icon: "arrow.triangle.2.circlepath",
+                                title: "Update Tools",
+                                description: "Installs latest yt-dlp version"
+                            )
+                        } else {
+                            SetupStepView(
+                                icon: "checkmark.circle.fill",
+                                title: "One-time setup",
+                                description: "Takes 3-5 minutes"
+                            )
+                        }
                         
                         SetupStepView(
                             icon: "bolt.fill",
@@ -299,8 +348,8 @@ struct FirstRunSetupView: View {
                         installEverything()
                     }) {
                         HStack {
-                            Image(systemName: "sparkles")
-                            Text("Start Setup")
+                            Image(systemName: mode == .update ? "arrow.triangle.2.circlepath" : "sparkles")
+                            Text(mode == .update ? "Update Now" : "Start Setup")
                             Image(systemName: "arrow.right")
                         }
                         .font(.headline)
@@ -349,7 +398,11 @@ struct FirstRunSetupView: View {
         .padding(40)
         .frame(width: 650, height: 600)
         .onAppear {
-            checkDependencies()
+            if mode == .install {
+                checkDependencies()
+            } else {
+                isCheckingDependencies = false
+            }
         }
     }
     
@@ -402,14 +455,26 @@ struct FirstRunSetupView: View {
         
         // Initialize installation steps
         DispatchQueue.main.async {
-            self.installationSteps = [
-                InstallStep(icon: "arrow.down.circle.fill", title: "Checking Homebrew", status: .pending),
-                InstallStep(icon: "video.fill", title: "Installing yt-dlp", status: .pending),
-                InstallStep(icon: "film.fill", title: "Installing ffmpeg", status: .pending)
-            ]
+            if self.mode == .update {
+                self.installationSteps = [
+                    InstallStep(icon: "arrow.down.circle.fill", title: "Updating Homebrew", status: .pending),
+                    InstallStep(icon: "video.fill", title: "Updating yt-dlp", status: .pending),
+                    InstallStep(icon: "film.fill", title: "Verifying ffmpeg", status: .pending)
+                ]
+            } else {
+                self.installationSteps = [
+                    InstallStep(icon: "arrow.down.circle.fill", title: "Checking Homebrew", status: .pending),
+                    InstallStep(icon: "video.fill", title: "Installing yt-dlp", status: .pending),
+                    InstallStep(icon: "film.fill", title: "Installing ffmpeg", status: .pending)
+                ]
+            }
         }
         
+        let isUpdateMode = (self.mode == .update)
+        let initialHasHomebrew = self.hasHomebrew
+        
         DispatchQueue.global().async {
+            // Use captured booleans to avoid MainActor isolation issues with enum comparisons
             // Helper function to add log entry
             func addLog(_ message: String) {
                 DispatchQueue.main.async {
@@ -486,18 +551,22 @@ struct FirstRunSetupView: View {
                 self.installProgress = "Checking Homebrew installation..."
             }
             
-            if !self.hasHomebrew {
+            if !initialHasHomebrew {
                 addLog("⚠️  Homebrew not found, installing...")
                 DispatchQueue.main.async {
                     self.installProgress = "Installing Homebrew...\nThis takes 2-3 minutes"
                 }
                 
                 // Non-interactive Homebrew installation
-                let homebrewInstall = """
-                NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-                """
-                
-                let result = runBrewCommand(homebrewInstall, progressMessage: "📦 Installing Homebrew... Please wait")
+                let result: (success: Bool, output: String)
+                if isUpdateMode {
+                     result = runBrewCommand("brew update", progressMessage: "🔄 Updating Homebrew... This may take a while")
+                } else {
+                     let homebrewInstall = """
+                     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                     """
+                     result = runBrewCommand(homebrewInstall, progressMessage: "📦 Installing Homebrew... Please wait")
+                }
                 
                 if !result.success {
                     print("❌ Homebrew install failed: \(result.output)")
@@ -509,7 +578,9 @@ struct FirstRunSetupView: View {
                     return
                 }
                 
-                self.hasHomebrew = true
+                DispatchQueue.main.async {
+                    self.hasHomebrew = true
+                }
             } else {
                 addLog("✅ Homebrew already installed")
             }
@@ -535,8 +606,8 @@ struct FirstRunSetupView: View {
             }
             
             let ytdlpResult = runBrewCommand(
-                "brew install yt-dlp",
-                progressMessage: "⚡ Installing yt-dlp..."
+                isUpdateMode ? "brew upgrade yt-dlp" : "brew install yt-dlp",
+                progressMessage: isUpdateMode ? "⚡ Updating yt-dlp..." : "⚡ Installing yt-dlp..."
             )
             
             if !ytdlpResult.success {
@@ -566,8 +637,8 @@ struct FirstRunSetupView: View {
             }
             
             let ffmpegResult = runBrewCommand(
-                "brew install ffmpeg",
-                progressMessage: "🎬 Installing ffmpeg..."
+                isUpdateMode ? "brew upgrade ffmpeg" : "brew install ffmpeg",
+                progressMessage: isUpdateMode ? "🎬 Updating ffmpeg..." : "🎬 Installing ffmpeg..."
             )
             
             if !ffmpegResult.success {

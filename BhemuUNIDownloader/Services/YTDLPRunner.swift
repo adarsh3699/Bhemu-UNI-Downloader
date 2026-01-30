@@ -21,6 +21,7 @@ class YTDLPRunner {
     private var currentQuality: DownloadQuality?
     private var currentOutputDirectory: URL?
     private var currentSettings: DownloadSettings?
+    private var currentPlaylistIndex: Int?
     private var isPaused: Bool = false
     
     // MARK: - Initialization
@@ -152,6 +153,7 @@ class YTDLPRunner {
         quality: DownloadQuality,
         outputDirectory: URL,
         settings: DownloadSettings,
+        playlistIndex: Int? = nil,
         onOutput: @escaping (String) -> Void,
         onError: @escaping (String) -> Void,
         onCompletion: @escaping (Bool) -> Void
@@ -161,6 +163,7 @@ class YTDLPRunner {
         currentQuality = quality
         currentOutputDirectory = outputDirectory
         currentSettings = settings
+        currentPlaylistIndex = playlistIndex
         isPaused = false
         
         // Cancel any existing process
@@ -217,7 +220,12 @@ class YTDLPRunner {
         
         // Custom filename template with quality info
         arguments.append("-o")
-        arguments.append("%(title)s [%(resolution)s].%(ext)s")
+        if let index = playlistIndex {
+            let prefix = String(format: "%02d ", index)
+            arguments.append("\(prefix)%(title)s [%(resolution)s].%(ext)s")
+        } else {
+            arguments.append("%(title)s [%(resolution)s].%(ext)s")
+        }
         
         // Enable continue/resume capability
         arguments.append("--continue")
@@ -307,6 +315,7 @@ class YTDLPRunner {
         currentQuality = nil
         currentOutputDirectory = nil
         currentSettings = nil
+        currentPlaylistIndex = nil
         
         process.terminate()
         self.process = nil
@@ -344,6 +353,7 @@ class YTDLPRunner {
             quality: quality,
             outputDirectory: outputDir,
             settings: settings,
+            playlistIndex: currentPlaylistIndex,
             onOutput: onOutput,
             onError: onError,
             onCompletion: onCompletion

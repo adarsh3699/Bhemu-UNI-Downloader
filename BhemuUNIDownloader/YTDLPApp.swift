@@ -14,6 +14,7 @@ import SwiftUI
 struct BhemuUNIDownloaderApp: App {
     @AppStorage("hasCompletedFirstRun") private var hasCompletedFirstRun = false
     @State private var showFirstRunSetup = false
+    @State private var setupMode: SetupMode = .install
     
     init() {
         // Check if dependencies are missing on launch
@@ -44,7 +45,7 @@ struct BhemuUNIDownloaderApp: App {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                     
-                    FirstRunSetupView {
+                    FirstRunSetupView(mode: setupMode) {
                         hasCompletedFirstRun = true
                         showFirstRunSetup = false
                     }
@@ -56,8 +57,20 @@ struct BhemuUNIDownloaderApp: App {
             .onAppear {
                 // Show setup on first run
                 if !hasCompletedFirstRun {
+                    setupMode = .install
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showFirstRunSetup = true
+                    }
+                } else {
+                    // Check for updates if already set up
+                    Task {
+                        if await UpdateChecker.checkForUpdates() {
+                            setupMode = .update
+                            DispatchQueue.main.async {
+                                showFirstRunSetup = true
+                                NSApp.activate(ignoringOtherApps: true)
+                            }
+                        }
                     }
                 }
             }

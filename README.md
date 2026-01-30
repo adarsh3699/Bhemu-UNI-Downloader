@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![macOS](https://img.shields.io/badge/macOS-13.0+-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.0+-orange)
@@ -18,14 +18,14 @@
 
 ## ✨ Features
 
--   🌐 **1000+ Websites** - YouTube, Instagram, TikTok, Twitter, Vimeo, and more
--   🎬 **Multiple Quality Options** - Best, 1440p, 1080p, 720p, 480p, or Audio-only (MP3)
--   📋 **Playlist Support** - Download entire playlists with concurrent downloads
--   💬 **Subtitle Support** - Download and embed subtitles in multiple languages
--   ⚡ **Real-time Progress** - Live speed, percentage, and ETA tracking
--   🔄 **Auto-Retry** - Failed downloads automatically retry up to 3 times
--   🎭 **Drag & Drop** - Drop URLs directly into the app
--   🔒 **100% Private** - All processing happens locally on your Mac
+- 🌐 **1000+ Websites** - YouTube, Instagram, TikTok, Twitter, Vimeo, and more
+- 🎬 **Multiple Quality Options** - Best, 1440p, 1080p, 720p, 480p, or Audio-only (MP3)
+- 📋 **Playlist Support** - Download entire playlists with concurrent downloads
+- 💬 **Subtitle Support** - Download and embed subtitles in multiple languages
+- ⚡ **Real-time Progress** - Live speed, percentage, and ETA tracking
+- 🔄 **Auto-Retry** - Failed downloads automatically retry up to 3 times
+- 🎭 **Drag & Drop** - Drop URLs directly into the app
+- 🔒 **100% Private** - All processing happens locally on your Mac
 
 ---
 
@@ -42,8 +42,8 @@
 
 #### 1. Prerequisites
 
--   macOS 13.0+ (Ventura or later)
--   Xcode 14.0+
+- macOS 13.0+ (Ventura or later)
+- Xcode 14.0+
 
 #### 2. Clone & Build
 
@@ -91,10 +91,10 @@ YouTube • Instagram • TikTok • Twitter/X • Facebook • Reddit • Vimeo
 
 ### Keyboard Shortcuts
 
--   `⌘↩` - Start download
--   `⌘.` - Cancel download
--   `⌘,` - Open settings
--   `⌘?` - Help
+- `⌘↩` - Start download
+- `⌘.` - Cancel download
+- `⌘,` - Open settings
+- `⌘?` - Help
 
 ---
 
@@ -116,7 +116,7 @@ The app will now launch normally. This only needs to be done once.
 
 **Method 2 - Right-click:**
 
--   Right-click the app → **Open** → Click **Open** in the warning dialog
+- Right-click the app → **Open** → Click **Open** in the warning dialog
 
 **Method 3 - Terminal command:**
 
@@ -128,14 +128,14 @@ This removes the quarantine attribute. Run this in Terminal if the app is in you
 
 **Download fails?**
 
--   Check if the URL works in your browser
--   Update yt-dlp: `brew upgrade yt-dlp`
--   Check the Download Log for error details
+- Check if the URL works in your browser
+- Update yt-dlp: `brew upgrade yt-dlp`
+- Check the Download Log for error details
 
 **Build issues?**
 
--   Clean build folder: `⇧⌘K` then rebuild in Xcode
--   Make sure you're running macOS 13.0+ and Xcode 14.0+
+- Clean build folder: `⇧⌘K` then rebuild in Xcode
+- Make sure you're running macOS 13.0+ and Xcode 14.0+
 
 **Still stuck?** Open an [issue](https://github.com/adarsh3699/Bhemu-UNI-Downloader/issues) or check the built-in Help (⌘?)
 
@@ -182,9 +182,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 🙏 Acknowledgments
 
--   **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - The powerful download engine
--   **[FFmpeg](https://ffmpeg.org/)** - Media processing toolkit
--   **Apple** - Swift and SwiftUI frameworks
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - The powerful download engine
+- **[FFmpeg](https://ffmpeg.org/)** - Media processing toolkit
+- **Apple** - Swift and SwiftUI frameworks
 
 ---
 
