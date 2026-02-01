@@ -213,10 +213,11 @@ class YTDLPRunner {
             arguments.append(settings.browserForCookies)
         }
         
-        // Skip n-parameter challenge (helps avoid "n challenge solving failed" errors)
-        // This may result in throttled speeds but avoids format restrictions
-        arguments.append("--extractor-args")
-        arguments.append("youtube:player_skip=webpage,configs,js")
+        // JS Runtime for bot detection (Critical for YouTube)
+        if let jsRuntime = findJSRuntime() {
+            arguments.append("--js-runtimes")
+            arguments.append("\(jsRuntime.name):\(jsRuntime.path)")
+        }
         
         // Custom filename template with quality info
         arguments.append("-o")
@@ -243,6 +244,10 @@ class YTDLPRunner {
         arguments.append(url)
         
         process.arguments = arguments
+        
+        #if DEBUG
+        print("🚀 Executing command: \(ytdlpPath) \(arguments.joined(separator: " "))")
+        #endif
         
         // Set up stdout pipe
         let outputPipe = Pipe()
@@ -408,5 +413,71 @@ class YTDLPRunner {
         } catch {
             print("⚠️ Error cleaning up subtitle files: \(error)")
         }
+    }
+    
+    // MARK: - JS Runtime Detection
+    
+    /// Finds a supported JS runtime (deno or node) to bypass YouTube bot detection
+    private func findJSRuntime() -> (name: String, path: String)? {
+        // Priority: 1. Deno (preferred by yt-dlp), 2. Node
+        
+        // Check for Deno
+        let denoPaths = [
+            "/opt/homebrew/bin/deno",
+            "/usr/local/bin/deno",
+            "/usr/bin/deno",
+            "\(FileManager.default.homeDirectoryForCurrentUser.path)/.deno/bin/deno"
+        ]
+        
+        for path in denoPaths {
+            if FileManager.default.fileExists(atPath: path) {
+                print("✅ Found JS runtime: deno at \(path)")
+                return ("deno", path)
+            }
+        }
+        
+        // Check for Node
+        let nodePaths = [
+            "/opt/homebrew/bin/node",
+            "/usr/local/bin/node",
+            "/usr/bin/node"
+            // Node might be in nvm paths, but standard install paths are safest to check first
+        ]
+        
+        for path in nodePaths {
+            if FileManager.default.fileExists(atPath: path) {
+                print("✅ Found JS runtime: node at \(path)")
+                return ("node", path)
+            }
+        }
+        
+        // Fallback: try `which` for both
+        for tool in ["deno", "node"] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+            process.arguments = [tool]
+            
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            
+            do {
+                try process.run()
+                process.waitUntilExit()
+                
+                if process.terminationStatus == 0 {
+                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                    if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                       !path.isEmpty {
+                        print("✅ Found JS runtime via which: \(tool) at \(path)")
+                        return (tool, path)
+                    }
+                }
+            } catch {
+                continue
+            }
+        }
+        
+        print("⚠️ No supported JS runtime (deno/node) found. YouTube downloads may fail.")
+        return nil
     }
 }
