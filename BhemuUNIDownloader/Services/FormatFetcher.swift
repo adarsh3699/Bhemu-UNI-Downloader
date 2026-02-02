@@ -40,46 +40,52 @@ class FormatFetcher {
     
     /// Internal method to fetch formats from yt-dlp
     private static func fetchFormatsInternal(for url: String) async -> AvailableQualities {
-        // Run on background thread to avoid blocking UI
-        return await Task.detached(priority: .userInitiated) {
-            let ytdlpPath = findYtdlpPath()
-            
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: ytdlpPath)
-            
-            // Use -F to list formats (much faster than --dump-json)
-            let arguments = [
-                "-F",  // List available formats
-                "--no-warnings",
-                "--socket-timeout", "8", // Network timeout
-                url
-            ]
-            process.arguments = arguments
-            
-            let outputPipe = Pipe()
-            let errorPipe = Pipe()
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
-            
-            do {
-                try process.run()
+        let process = Process()
+        
+        return await withTaskCancellationHandler {
+            // Run on background thread to avoid blocking UI
+            return await Task.detached(priority: .userInitiated) {
+                let ytdlpPath = findYtdlpPath()
                 
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                process.waitUntilExit()
+                process.executableURL = URL(fileURLWithPath: ytdlpPath)
                 
-                guard process.terminationStatus == 0,
-                      let output = String(data: outputData, encoding: .utf8) else {
-                    print("⚠️ Failed to fetch formats")
+                // Use -F to list formats (much faster than --dump-json)
+                let arguments = [
+                    "-F",  // List available formats
+                    "--no-warnings",
+                    "--socket-timeout", "8", // Network timeout
+                    url
+                ]
+                process.arguments = arguments
+                
+                let outputPipe = Pipe()
+                let errorPipe = Pipe()
+                process.standardOutput = outputPipe
+                process.standardError = errorPipe
+                
+                do {
+                    try process.run()
+                    
+                    let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                    process.waitUntilExit()
+                    
+                    guard process.terminationStatus == 0,
+                          let output = String(data: outputData, encoding: .utf8) else {
+                        print("⚠️ Failed to fetch formats")
+                        return .all // Fallback to showing all options
+                    }
+                    
+                    return Self.parseFormatsList(output)
+                    
+                } catch {
+                    print("⚠️ Error fetching formats: \(error)")
                     return .all // Fallback to showing all options
                 }
-                
-                return Self.parseFormatsList(output)
-                
-            } catch {
-                print("⚠️ Error fetching formats: \(error)")
-                return .all // Fallback to showing all options
-            }
-        }.value
+            }.value
+        } onCancel: {
+            print("🛑 Cancelling format fetch process")
+            process.terminate()
+        }
     }
     
     /// Finds yt-dlp binary path: PRIORITIZES system paths for performance, then bundled
@@ -207,45 +213,51 @@ class FormatFetcher {
     
     /// Fetches available subtitle languages for a given URL
     static func fetchAvailableSubtitles(for url: String) async -> [SubtitleLanguage] {
-        return await Task.detached(priority: .userInitiated) {
-            let ytdlpPath = findYtdlpPath()
-            
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: ytdlpPath)
-            
-            // Use --list-subs to get available subtitles
-            let arguments = [
-                "--list-subs",
-                "--no-warnings",
-                "--socket-timeout", "8",
-                url
-            ]
-            process.arguments = arguments
-            
-            let outputPipe = Pipe()
-            let errorPipe = Pipe()
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
-            
-            do {
-                try process.run()
+        let process = Process()
+        
+        return await withTaskCancellationHandler {
+            return await Task.detached(priority: .userInitiated) {
+                let ytdlpPath = findYtdlpPath()
                 
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                process.waitUntilExit()
+                process.executableURL = URL(fileURLWithPath: ytdlpPath)
                 
-                guard process.terminationStatus == 0,
-                      let output = String(data: outputData, encoding: .utf8) else {
-                    print("⚠️ Failed to fetch subtitles")
+                // Use --list-subs to get available subtitles
+                let arguments = [
+                    "--list-subs",
+                    "--no-warnings",
+                    "--socket-timeout", "8",
+                    url
+                ]
+                process.arguments = arguments
+                
+                let outputPipe = Pipe()
+                let errorPipe = Pipe()
+                process.standardOutput = outputPipe
+                process.standardError = errorPipe
+                
+                do {
+                    try process.run()
+                    
+                    let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                    process.waitUntilExit()
+                    
+                    guard process.terminationStatus == 0,
+                          let output = String(data: outputData, encoding: .utf8) else {
+                        print("⚠️ Failed to fetch subtitles")
+                        return []
+                    }
+                    
+                    return Self.parseSubtitlesList(output)
+                    
+                } catch {
+                    print("⚠️ Error fetching subtitles: \(error)")
                     return []
                 }
-                
-                return Self.parseSubtitlesList(output)
-                
-            } catch {
-                print("⚠️ Error fetching subtitles: \(error)")
-                return []
-            }
-        }.value
+            }.value
+        } onCancel: {
+            print("🛑 Cancelling subtitle fetch process")
+            process.terminate()
+        }
     }
     
     /// Parse subtitle list from --list-subs output

@@ -230,7 +230,7 @@ class YTDLPRunner {
         
         // Enable continue/resume capability
         arguments.append("--continue")
-        arguments.append("--no-part")  // Don't use .part files for cleaner resume
+        // arguments.append("--no-part")  // REMOVED: Breaks resume functionality (yt-dlp needs .part files to resume)
         
         // Add output directory
         arguments.append("-P")
