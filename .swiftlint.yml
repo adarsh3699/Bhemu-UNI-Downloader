@@ -1,140 +1,140 @@
-# SwiftLint Configuration for YTDLPApp
+# SwiftLint Configuration for BhemuUNIDownloader
 # https://github.com/realm/SwiftLint
 
 # Enabled Rules
 opt_in_rules:
-  - array_init
-  - attributes
-  - closure_end_indentation
-  - closure_spacing
-  - collection_alignment
-  - contains_over_first_not_nil
-  - empty_count
-  - empty_string
-  - explicit_init
-  - fatal_error_message
-  - first_where
-  - force_unwrapping
-  - implicitly_unwrapped_optional
-  - last_where
-  - literal_expression_end_indentation
-  - multiline_arguments
-  - multiline_function_chains
-  - multiline_literal_brackets
-  - multiline_parameters
-  - operator_usage_whitespace
-  - overridden_super_call
-  - prefer_self_type_over_type_of_self
-  - redundant_nil_coalescing
-  - redundant_type_annotation
-  - sorted_first_last
-  - toggle_bool
-  - trailing_closure
-  - unneeded_parentheses_in_closure_argument
-  - vertical_parameter_alignment_on_call
-  - vertical_whitespace_closing_braces
-  - vertical_whitespace_opening_braces
-  - yoda_condition
+    - array_init
+    - attributes
+    - closure_end_indentation
+    - closure_spacing
+    - collection_alignment
+    - contains_over_first_not_nil
+    - empty_count
+    - empty_string
+    - explicit_init
+    - fatal_error_message
+    - first_where
+    - force_unwrapping
+    - implicitly_unwrapped_optional
+    - last_where
+    - literal_expression_end_indentation
+    - multiline_arguments
+    - multiline_function_chains
+    - multiline_literal_brackets
+    - multiline_parameters
+    - operator_usage_whitespace
+    - overridden_super_call
+    - prefer_self_type_over_type_of_self
+    - redundant_nil_coalescing
+    - redundant_type_annotation
+    - sorted_first_last
+    - toggle_bool
+    - trailing_closure
+    - unneeded_parentheses_in_closure_argument
+    - vertical_parameter_alignment_on_call
+    - vertical_whitespace_closing_braces
+    - vertical_whitespace_opening_braces
+    - yoda_condition
 
 # Disabled Rules (with reasons)
 disabled_rules:
-  - trailing_whitespace  # Auto-formatting handles this
-  - line_length  # SwiftUI closures can be long
-  - function_body_length  # SwiftUI views can be complex
+    - trailing_whitespace # Auto-formatting handles this
+    - line_length # SwiftUI closures can be long
+    - function_body_length # SwiftUI views can be complex
 
 # Rule Configurations
 line_length:
-  warning: 120
-  error: 200
-  ignores_comments: true
-  ignores_urls: true
-  ignores_function_declarations: true
-  ignores_interpolated_strings: true
+    warning: 120
+    error: 200
+    ignores_comments: true
+    ignores_urls: true
+    ignores_function_declarations: true
+    ignores_interpolated_strings: true
 
 file_length:
-  warning: 600
-  error: 1000
-  ignore_comment_only_lines: true
+    warning: 600
+    error: 1000
+    ignore_comment_only_lines: true
 
 function_body_length:
-  warning: 100
-  error: 200
+    warning: 100
+    error: 200
 
 type_body_length:
-  warning: 400
-  error: 600
+    warning: 400
+    error: 600
 
 function_parameter_count:
-  warning: 6
-  error: 8
+    warning: 6
+    error: 8
 
 cyclomatic_complexity:
-  warning: 15
-  error: 25
-  ignores_case_statements: true
+    warning: 15
+    error: 25
+    ignores_case_statements: true
 
 nesting:
-  type_level:
-    warning: 3
-  statement_level:
-    warning: 5
+    type_level:
+        warning: 3
+    statement_level:
+        warning: 5
 
 identifier_name:
-  min_length:
-    warning: 2
-    error: 1
-  max_length:
-    warning: 50
-    error: 60
-  excluded:
-    - id
-    - URL
-    - url
-    - eta
-    - ETA
+    min_length:
+        warning: 2
+        error: 1
+    max_length:
+        warning: 50
+        error: 60
+    excluded:
+        - id
+        - URL
+        - url
+        - eta
+        - ETA
 
 # Type Name
 type_name:
-  min_length: 3
-  max_length:
-    warning: 50
-    error: 60
-  excluded:
-    - ID
+    min_length: 3
+    max_length:
+        warning: 50
+        error: 60
+    excluded:
+        - ID
 
 # Force Cast
 force_cast:
-  severity: warning
+    severity: warning
 
 # Force Try
 force_try:
-  severity: warning
+    severity: warning
 
 # Trailing Comma
 trailing_comma:
-  mandatory_comma: true
+    mandatory_comma: true
 
 # Empty Count
 empty_count:
-  severity: warning
+    severity: warning
 
 # Vertical Whitespace
 vertical_whitespace:
-  max_empty_lines: 2
+    max_empty_lines: 2
 
 # Reporter
 reporter: "xcode"
 
 # Paths
 included:
-  - YTDLPApp
+    - BhemuUNIDownloader
 
 excluded:
-  - Pods
-  - Carthage
-  - .build
-  - DerivedData
-  - .swiftpm
+    - Pods
+    - Carthage
+    - .build
+    - DerivedData
+    - .swiftpm
 
 # SwiftLint version
 swiftlint_version: 0.54.0

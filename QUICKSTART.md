@@ -4,7 +4,7 @@
 
 ### For Most Users:
 
-1. **Download** the DMG from [Releases](https://github.com/adarsh3699/YTDLPApp/releases)
+1. **Download** the DMG from [Releases](https://github.com/adarsh3699/Bhemu-UNI-Downloader/releases)
 2. **Drag** the app to Applications
 3. **Launch** the app
 4. On first launch, you'll see a setup screen
@@ -23,6 +23,7 @@ brew install yt-dlp ffmpeg
 ```
 
 Don't have Homebrew? Install it first:
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
