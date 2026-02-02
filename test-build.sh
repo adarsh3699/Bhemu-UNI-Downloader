@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 
 # Quick Test Build Script
 # Tests the bundled binaries without creating full DMG
